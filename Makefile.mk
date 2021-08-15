@@ -1,5 +1,5 @@
-OBJS	= Main.o Screen.o Input.o
-SOURCE	= Main.cpp Screen.cpp Input.cpp
+OBJS	= Main.o Screen.o Input.o glad.o
+SOURCE	= Main.cpp Screen.cpp Input.cpp glad/src/glad.c
 #HEADER	=
 
 ifeq ($(OS),Windows_NT)
@@ -9,7 +9,7 @@ OUT	= Graphics_Engine
 endif
 
 CC	 = i686-w64-mingw32-g++
-FLAGS	 = -g -c -Wall -Wno-unknown-pragmas -ISDL/include
+FLAGS	 = -g -c -Wall -Wno-unknown-pragmas -ISDL/include -Iglad/include
 LFLAGS	 = -ISDL/include -LSDL/lib -lmingw32 -lSDL2main -lSDL2 -lopengl32
 
 # libmingw32
@@ -25,6 +25,9 @@ Screen.o: Screen.cpp
 
 Input.o: Input.cpp
 	$(CC) $(FLAGS) Input.cpp 
+
+glad.o: glad/src/glad.c
+	$(CC) $(FLAGS) glad/src/glad.c
 
 clean:
 	$(RM) $(OUT) $(OBJS) 

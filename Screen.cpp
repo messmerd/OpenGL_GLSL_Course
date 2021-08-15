@@ -1,7 +1,6 @@
 #include "Screen.h"
 
-#include <windows.h>
-#include <GL/gl.h> // Only provides headers for very old OpenGL
+#include "glad/glad.h"
 
 #include <iostream>
 
@@ -56,6 +55,12 @@ bool Screen::Initialize()
     if (!context)
     {
         std::cout << "Failed to create context" << std::endl;
+        return false;
+    }
+
+    if (!gladLoadGL())
+    {
+        std::cout << "Error loading extensions" << std::endl;
         return false;
     }
 

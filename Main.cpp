@@ -1,8 +1,7 @@
-#include <windows.h>
-#include <GL/gl.h> // Only provides headers for very old OpenGL
-
 #include <iostream>
 #include <SDL.h>
+
+#include "glad/glad.h"
 
 #include "Screen.h"
 #include "Input.h"
