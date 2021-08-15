@@ -1,5 +1,5 @@
-OBJS	= Main.o Screen.o
-SOURCE	= Main.cpp Screen.cpp
+OBJS	= Main.o Screen.o Input.o
+SOURCE	= Main.cpp Screen.cpp Input.cpp
 #HEADER	=
 
 ifeq ($(OS),Windows_NT)
@@ -22,6 +22,9 @@ Main.o: Main.cpp
 
 Screen.o: Screen.cpp
 	$(CC) $(FLAGS) Screen.cpp 
+
+Input.o: Input.cpp
+	$(CC) $(FLAGS) Input.cpp 
 
 clean:
 	$(RM) $(OUT) $(OBJS) 

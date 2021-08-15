@@ -12,7 +12,7 @@ public:
     bool Initialize();
     void Clear() const;
     void Present() const; // Swaps buffer
-    void Shutdown() const;
+    void Shutdown();
 
 private:
     Screen();

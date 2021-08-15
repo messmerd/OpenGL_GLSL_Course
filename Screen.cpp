@@ -72,7 +72,7 @@ void Screen::Present() const // Swaps buffer
     SDL_GL_SwapWindow(window); // Swaps the back and front buffers since we have double buffering on
 }
 
-void Screen::Shutdown() const
+void Screen::Shutdown()
 {
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
