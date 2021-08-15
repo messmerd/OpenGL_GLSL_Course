@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/mingw/i686-7.3.0-release-posix-dwarf-rt_v5-rev0/mingw32/i686-w64-mingw32/include/**",
+                "${workspaceFolder}/SDL/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:/mingw/i686-7.3.0-release-posix-dwarf-rt_v5-rev0/mingw32/bin/g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64"
+        }
+    ],
+    "version": 4
+}
