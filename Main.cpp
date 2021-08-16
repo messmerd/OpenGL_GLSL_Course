@@ -5,16 +5,37 @@
 
 #include "Screen.h"
 #include "Input.h"
+#include "Shader.h"
 
 // I'm only using SDL to manage OpenGL context and inputs as a helper for using OpenGL.
 
 bool isAppRunning = true;
 Screen* screen = Screen::Instance();
 Input* input = Input::Instance();
+Shader* shaders = Shader::Instance();
 
 int main(int argc, char* args[])
 {
     screen->Initialize();
+
+    // Create shader program and shader objects
+    if (!shaders->CreateProgram() || !shaders->CreateShaders())
+        return 1;
+
+    // Compile vertex shader
+    if (!shaders->CompileShaders("Shaders/Main.vert", Shader::ShaderType::VERTEX_SHADER))
+        return 1;
+
+    // Compile fragment shader
+    if (!shaders->CompileShaders("Shaders/Main.frag", Shader::ShaderType::FRAGMENT_SHADER))
+        return 1;
+
+    // Attach shaders to shader program
+    shaders->AttachShaders();
+
+    // Link shaders to shader program
+    if (!shaders->LinkProgram())
+        return 1;
 
     float xPos = 0.0f; // Middle of screen
     float yPos = 0.0f; // Middle of screen
@@ -72,6 +93,9 @@ int main(int argc, char* args[])
         screen->Present();
     }
 
+    shaders->DetachShaders();
+    shaders->DetachShaders();
+    shaders->DestroyProgram();
     screen->Shutdown();
 
     //system("pause");
