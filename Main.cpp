@@ -40,6 +40,11 @@ int main(int argc, char* args[])
     float xPos = 0.0f; // Middle of screen
     float yPos = 0.0f; // Middle of screen
 
+    Uniform time = shaders->GetUniform("time");
+    time = 5;
+
+    //====================================================================
+
     while (isAppRunning)
     {
         screen->Clear();

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 Shader::Shader()
 {
@@ -145,3 +146,125 @@ void Shader::DestroyProgram()
 {
     glDeleteProgram(m_ShaderProgramId);
 }
+
+Uniform Shader::GetUniform(const char* name)
+{
+    Uniform u(m_ShaderProgramId, name);
+    if (!u.IsValid())
+        std::cout << "Shader variable '" << name << "' not found or not used." << std::endl;
+
+    return u;
+}
+
+
+Uniform::Uniform()
+{
+    m_Id = -1;
+}
+
+Uniform::Uniform(GLuint shaderProgramId, const char* name)
+{
+    Load(shaderProgramId, name);
+}
+
+bool Uniform::Load(GLuint shaderProgramId, const char* name)
+{
+    m_Id = glGetUniformLocation(shaderProgramId, name);
+
+    std::cout << "m_Id=" << std::to_string(m_Id) << "\n";
+
+    return m_Id != -1;
+}
+
+void Uniform::operator=(GLint data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    glUniform1i(m_Id, data);
+}
+
+void Uniform::operator=(GLuint data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    glUniform1ui(m_Id, data);
+}
+
+void Uniform::operator=(GLfloat data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    glUniform1f(m_Id, data);
+}
+
+void Uniform::operator=(double data)
+{
+    *this = static_cast<GLfloat>(data);
+}
+
+void Uniform::operator=(std::initializer_list<GLint> data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+
+    switch (data.size())
+    {
+        case 2:
+            glUniform2iv(m_Id, 1, data.begin());
+            break;
+        case 3:
+            glUniform3iv(m_Id, 1, data.begin());
+            break;
+        case 4:
+            glUniform4iv(m_Id, 1, data.begin());
+            break;
+        default:
+            throw std::invalid_argument("Wrong number of elements in initializer list");
+    }
+}
+
+void Uniform::operator=(std::initializer_list<GLuint> data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+
+    switch (data.size())
+    {
+        case 2:
+            glUniform2uiv(m_Id, 1, data.begin());
+            break;
+        case 3:
+            glUniform3uiv(m_Id, 1, data.begin());
+            break;
+        case 4:
+            glUniform4uiv(m_Id, 1, data.begin());
+            break;
+        default:
+            throw std::invalid_argument("Wrong number of elements in initializer list");
+    }
+}
+
+void Uniform::operator=(std::initializer_list<GLfloat> data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+
+    switch (data.size())
+    {
+        case 2:
+            glUniform2fv(m_Id, 1, data.begin());
+            break;
+        case 3:
+            glUniform3fv(m_Id, 1, data.begin());
+            break;
+        case 4:
+            glUniform4fv(m_Id, 1, data.begin());
+            break;
+        default:
+            throw std::invalid_argument("Wrong number of elements in initializer list");
+    }
+}
+
