@@ -147,6 +147,20 @@ void Shader::DestroyProgram()
     glDeleteProgram(m_ShaderProgramId);
 }
 
+GLuint Shader::BeginVAOBind()
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+
+    glBindVertexArray(vao);
+    return vao;
+}
+
+void Shader::EndVAOBind()
+{
+    glBindVertexArray(0);
+}
+
 Uniform Shader::GetUniform(const char* name)
 {
     Uniform u(m_ShaderProgramId, name);
@@ -156,23 +170,20 @@ Uniform Shader::GetUniform(const char* name)
     return u;
 }
 
-
-Uniform::Uniform()
+VertexAttribute Shader::GetVectorAttribute(const char* name)
 {
-    m_Id = -1;
+    VertexAttribute va(m_ShaderProgramId, name);
+    if (!va.IsValid())
+        std::cout << "Shader variable '" << name << "' not found or not used." << std::endl;
+
+    return va;
 }
 
-Uniform::Uniform(GLuint shaderProgramId, const char* name)
-{
-    Load(shaderProgramId, name);
-}
+// Uniform variables
 
 bool Uniform::Load(GLuint shaderProgramId, const char* name)
 {
     m_Id = glGetUniformLocation(shaderProgramId, name);
-
-    std::cout << "m_Id=" << std::to_string(m_Id) << "\n";
-
     return m_Id != -1;
 }
 
@@ -268,3 +279,124 @@ void Uniform::operator=(std::initializer_list<GLfloat> data)
     }
 }
 
+// Vertex Attributes - Vertex Buffer Objects (VBO) or Vertex Array Objects (VAO).
+//      If using as VAOs, call Shader::BeginVAOBind() before calling VertexAttribute::Bind()'s and 
+//      call Shader::EndVAOBind() afterwards.
+
+bool VertexAttribute::Load(GLuint shaderProgramId, const char* name)
+{
+    m_Id = glGetAttribLocation(shaderProgramId, name);
+    return m_Id != -1;
+}
+
+bool VertexAttribute::Bind(const void* data, GLsizeiptr size)
+{
+    m_VBO = 0;
+    glGenBuffers(1, &m_VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    glVertexAttribPointer(m_Id, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(m_Id);
+
+    return true;
+}
+
+void VertexAttribute::Destroy()
+{
+    // Delete buffers then disable vertex attribute array
+    glDeleteBuffers(1, &m_VBO);
+    glDisableVertexAttribArray(m_Id);
+}
+
+void VertexAttribute::operator=(GLint data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    //TODO
+}
+
+void VertexAttribute::operator=(GLuint data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    //TODO
+}
+
+void VertexAttribute::operator=(GLfloat data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    //TODO
+}
+
+void VertexAttribute::operator=(double data)
+{
+    *this = static_cast<GLfloat>(data);
+}
+
+void VertexAttribute::operator=(std::initializer_list<GLint> data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+
+    switch (data.size())
+    {
+        case 2:
+            //TODO
+            break;
+        case 3:
+            //TODO
+            break;
+        case 4:
+            //TODO
+            break;
+        default:
+            throw std::invalid_argument("Wrong number of elements in initializer list");
+    }
+}
+
+void VertexAttribute::operator=(std::initializer_list<GLuint> data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+
+    switch (data.size())
+    {
+        case 2:
+            //TODO
+            break;
+        case 3:
+            //TODO
+            break;
+        case 4:
+            //TODO
+            break;
+        default:
+            throw std::invalid_argument("Wrong number of elements in initializer list");
+    }
+}
+
+void VertexAttribute::operator=(std::initializer_list<GLfloat> data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+
+    switch (data.size())
+    {
+        case 2:
+            //TODO
+            break;
+        case 3:
+            //TODO
+            break;
+        case 4:
+            //TODO
+            break;
+        default:
+            throw std::invalid_argument("Wrong number of elements in initializer list");
+    }
+}

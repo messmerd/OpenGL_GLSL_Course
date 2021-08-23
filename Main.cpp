@@ -40,8 +40,34 @@ int main(int argc, char* args[])
     float xPos = 0.0f; // Middle of screen
     float yPos = 0.0f; // Middle of screen
 
-    Uniform time = shaders->GetUniform("time");
-    time = 5;
+    // Data that represents vertices for quad
+    GLfloat vertices[] = {  -1.0f,  +1.0f,  0.0f,
+                            +1.0f,  +1.0f,  0.0f,
+                            -1.0f,  -1.0f,  0.0f, // Triangle 1
+
+                            -1.0f,  -1.0f,  0.0f,
+                            +1.0f,  +1.0f,  0.0f,
+                            +1.0f,  -1.0f,  0.0f }; // Triangle 2
+
+    // Data that represents colors for quad
+    GLfloat colors[] = {    0.0f,   0.0f,   1.0f,
+                            0.0f,   0.0f,   1.0f,
+                            1.0f,   1.0f,   1.0f, // Triangle 1
+
+                            1.0f,   1.0f,   1.0f,
+                            0.0f,   0.0f,   1.0f,
+                            1.0f,   1.0f,   1.0f }; // Triangle 2
+
+    //Uniform time = shaders->GetUniform("time");
+    //time = 5;
+
+    VertexAttribute vertexAttrib = shaders->GetVectorAttribute("vertexIn");
+    VertexAttribute colorAttrib = shaders->GetVectorAttribute("colorIn");
+
+    GLuint vao = shaders->BeginVAOBind();
+        vertexAttrib.Bind(vertices, sizeof(vertices));
+        colorAttrib.Bind(colors, sizeof(colors));
+    shaders->EndVAOBind();
 
     //====================================================================
 
@@ -74,29 +100,16 @@ int main(int argc, char* args[])
         }
         
         // Update/render stuff
-        // Render a quad the OLD way
-        glBegin(GL_QUADS);
-
-            // Top left color and vertex of quad
-            glColor3f(1, 0, 0);
-            glVertex3f(xPos - 0.5f, yPos + 0.5f, 0.0f);
-
-            // Top right color and vertex of quad
-            glColor3f(0, 1, 0);
-            glVertex3f(xPos + 0.5f, yPos + 0.5f, 0.0f);
-
-            // Bottom right color and vertex of quad
-            glColor3f(0, 0, 1);
-            glVertex3f(xPos + 0.5f, yPos - 0.5f, 0.0f);
-
-            // Bottom left color and vertex of quad
-            glColor3f(0, 0, 1);
-            glVertex3f(xPos - 0.5f, yPos - 0.5f, 0.0f);
-
-        glEnd();
+        glBindVertexArray(vao); // Bind
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0); // Unbind
 
         screen->Present();
     }
+
+    vertexAttrib.Destroy();
+    colorAttrib.Destroy();
+    glDeleteVertexArrays(1, &vao);
 
     shaders->DetachShaders();
     shaders->DetachShaders();
