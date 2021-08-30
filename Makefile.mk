@@ -1,5 +1,5 @@
-OBJS	= Main.o Screen.o Input.o Shader.o glad.o
-SOURCE	= Main.cpp Screen.cpp Input.cpp Shader.cpp glad/src/glad.c
+OBJS	= Main.o Screen.o Input.o Shader.o Buffer.o Quad.o glad.o
+SOURCE	= Main.cpp Screen.cpp Input.cpp Shader.cpp Buffer.cpp Quad.cpp glad/src/glad.c
 #HEADER	=
 
 ifeq ($(OS),Windows_NT)
@@ -28,6 +28,12 @@ Input.o: Input.cpp
 
 Shader.o: Shader.cpp
 	$(CC) $(FLAGS) Shader.cpp 
+
+Buffer.o: Buffer.cpp
+	$(CC) $(FLAGS) Buffer.cpp 
+
+Quad.o: Quad.cpp
+	$(CC) $(FLAGS) Quad.cpp 
 
 glad.o: glad/src/glad.c
 	$(CC) $(FLAGS) glad/src/glad.c

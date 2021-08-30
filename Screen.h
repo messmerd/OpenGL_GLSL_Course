@@ -9,17 +9,24 @@ public:
     static Screen* Instance();
 
 public:
+    // Initialize SDL and OpenGL
     bool Initialize();
-    void Clear() const;
-    void Present() const; // Swaps buffer
     void Shutdown();
+
+    void Present() const; // Swaps buffer
+    void Clear() const;
+    
+    
+    bool IsInitialized() { return m_IsInitialized; }
 
 private:
     Screen();
-    Screen(const Screen&);
-    Screen& operator=(const Screen&);
+    Screen(const Screen&) = delete;
+    Screen& operator=(const Screen&) = delete;
 
 private:
+    bool m_IsInitialized;
+
     SDL_Window* window;
     SDL_GLContext context;
 };

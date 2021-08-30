@@ -29,8 +29,8 @@ public:
 
 private:
     Input();
-    Input(const Input&);
-    Input& operator=(Input&);
+    Input(const Input&) = delete;
+    Input& operator=(Input&) = delete;
 
 private:
 

@@ -3,6 +3,8 @@
 #include <string>
 #include "glad/glad.h"
 
+void GetError(const char* context); // For debugging
+
 class Uniform; // Forward definition
 class VertexAttribute; // Forward definition
 
@@ -14,7 +16,20 @@ public:
 public:
     static Shader* Instance();
 
-public:
+    // Create shader program, create/compile/attach shaders, and link shaders to program
+    bool Initialize(const char* vertexShaderFilename, const char* fragmentShaderFilename);
+
+    // Detach shaders and destroy shader program
+    void Destroy();
+
+    bool IsInitialized() { return m_IsInitialized; }
+    GLuint GetShaderProgramId() { return m_ShaderProgramId; }
+    
+private:
+    Shader();
+    Shader(const Shader&) = delete;
+    Shader& operator=(Shader&) = delete;
+
     bool CreateProgram();
     bool CreateShaders();
 
@@ -26,22 +41,9 @@ public:
     void DestroyShaders();
     void DestroyProgram();
 
-    GLuint GetShaderProgramId() { return m_ShaderProgramId; }
-
-    GLuint BeginVAOBind();
-    void EndVAOBind();
-
-    Uniform GetUniform(const char* name);
-    VertexAttribute GetVectorAttribute(const char* name);
-
 private:
-    Shader();
-    Shader(const Shader&);
-    Shader& operator=(Shader&);
+    bool m_IsInitialized;
 
-    bool LoadUniform(const char* uniformName);
-
-private:
     GLuint m_ShaderProgramId;
     GLuint m_VertexShaderId;
     GLuint m_FragmentShaderId;
@@ -50,22 +52,15 @@ private:
 class ShaderVariable
 {
 friend class Shader;
+
 protected:
     ShaderVariable() { m_Id = -1; }
 
-protected:
     virtual bool Load(GLuint shaderProgramId, const char* name) = 0;
+
+public:
     bool IsValid() const { return m_Id != -1; }
-
-    virtual void operator=(GLint data) = 0;
-    virtual void operator=(GLuint data) = 0;
-    virtual void operator=(GLfloat data) = 0;
-    virtual void operator=(double data) = 0;
-
-    virtual void operator=(std::initializer_list<GLint> data) = 0;
-    virtual void operator=(std::initializer_list<GLuint> data) = 0;
-    virtual void operator=(std::initializer_list<GLfloat> data) = 0;
-
+    
 protected:
     GLint m_Id;
 };
@@ -74,9 +69,15 @@ class Uniform : public ShaderVariable
 {
 friend class Shader;
 
-private:
-    //Uniform(const Uniform& u); // Prevent copy constructor from being used
+public:
     Uniform() : ShaderVariable() {};
+    Uniform(const char* name)
+    {
+        Load(Shader::Instance()->GetShaderProgramId(), name);
+    }
+
+private:
+    //Uniform(const Uniform& u) = delete; // Prevent copy constructor from being used
     Uniform(GLuint shaderProgramId, const char* name)
     {
         Load(shaderProgramId, name);
@@ -99,28 +100,31 @@ class VertexAttribute : public ShaderVariable
 {
 friend class Shader;
 
-private:
-    //VertexAttribute(const VertexAttribute& va); // Prevent copy constructor from being used
+public:
+    enum ComponentType { XY = 2, XYZ = 3, RGB = 3, RGBA = 4, UV = 2 };
+    enum DataType { INT = GL_INT, FLOAT = GL_FLOAT, UNSIGNED_INT = GL_UNSIGNED_INT };
+    enum FillType { SINGLE = GL_STATIC_DRAW, MULTIPLE = GL_DYNAMIC_DRAW };
+
     VertexAttribute() : ShaderVariable() { m_VBO = 0; }
+    VertexAttribute(const char* name)
+    {
+        Load(Shader::Instance()->GetShaderProgramId(), name);
+    }
+
+private:
+    //VertexAttribute(const VertexAttribute& va) = delete; // Prevent copy constructor from being used
     VertexAttribute(GLuint shaderProgramId, const char* name)
     {
         Load(shaderProgramId, name);
     }
 
 public:
+    bool Load(const char* name);
     bool Load(GLuint shaderProgramId, const char* name);
-    bool Bind(const void* data, GLsizeiptr size);
+    void Set(GLfloat* data, GLsizeiptr size, FillType fillType);
+    bool Link(ComponentType componentType, DataType dataType);
 
     void Destroy();
-
-    void operator=(GLint data);
-    void operator=(GLuint data);
-    void operator=(GLfloat data);
-    void operator=(double data);
-
-    void operator=(std::initializer_list<GLint> data);
-    void operator=(std::initializer_list<GLuint> data);
-    void operator=(std::initializer_list<GLfloat> data);
 
 private:
     GLuint m_VBO;

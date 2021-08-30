@@ -1,11 +1,11 @@
 #include "Screen.h"
-
 #include "glad/glad.h"
 
 #include <iostream>
 
 Screen::Screen()
 {
+    m_IsInitialized = false;
     window = nullptr;
     context = nullptr;
 }
@@ -64,12 +64,16 @@ bool Screen::Initialize()
         return false;
     }
 
+    m_IsInitialized = true;
     return true;
 }
 
-void Screen::Clear() const
+void Screen::Shutdown()
 {
-    glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
+    m_IsInitialized = false;
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }
 
 void Screen::Present() const // Swaps buffer
@@ -77,10 +81,7 @@ void Screen::Present() const // Swaps buffer
     SDL_GL_SwapWindow(window); // Swaps the back and front buffers since we have double buffering on
 }
 
-void Screen::Shutdown()
+void Screen::Clear() const
 {
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
 }
-

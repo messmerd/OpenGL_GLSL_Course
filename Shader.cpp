@@ -6,6 +6,7 @@
 
 Shader::Shader()
 {
+    m_IsInitialized = false;
     m_ShaderProgramId = 0;
     m_VertexShaderId = 0;
     m_FragmentShaderId = 0;
@@ -16,6 +17,38 @@ Shader* Shader::Instance()
     // First call will create shader object and all subsequent calls will just return shader pointer
     static Shader* shader = new Shader;
     return shader;
+}
+
+bool Shader::Initialize(const char* vertexShaderFilename, const char* fragmentShaderFilename)
+{
+    // Create shader program and shader objects
+    if (!CreateProgram() || !CreateShaders())
+        return false;
+
+    // Compile vertex shader
+    if (!CompileShaders(vertexShaderFilename, Shader::ShaderType::VERTEX_SHADER))
+        return false;
+
+    // Compile fragment shader
+    if (!CompileShaders(fragmentShaderFilename, Shader::ShaderType::FRAGMENT_SHADER))
+        return false;
+
+    // Attach shaders to shader program
+    AttachShaders();
+
+    // Link shaders to shader program
+    if (!LinkProgram())
+        return false;
+
+    m_IsInitialized = true;
+    return true;
+}
+
+void Shader::Destroy()
+{
+    DetachShaders();
+    DestroyProgram();
+    m_IsInitialized = false;
 }
 
 bool Shader::CreateProgram()
@@ -81,7 +114,7 @@ bool Shader::CompileShaders(const std::string& filename, ShaderType shaderType)
 
     if (errorCode == GL_TRUE)
     {
-        std::cout << "Shader compilation successful" << std::endl;
+        std::cout << "Shader compilation successful (" << filename << ")" << std::endl;
     }
     else
     {
@@ -147,43 +180,17 @@ void Shader::DestroyProgram()
     glDeleteProgram(m_ShaderProgramId);
 }
 
-GLuint Shader::BeginVAOBind()
-{
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-
-    glBindVertexArray(vao);
-    return vao;
-}
-
-void Shader::EndVAOBind()
-{
-    glBindVertexArray(0);
-}
-
-Uniform Shader::GetUniform(const char* name)
-{
-    Uniform u(m_ShaderProgramId, name);
-    if (!u.IsValid())
-        std::cout << "Shader variable '" << name << "' not found or not used." << std::endl;
-
-    return u;
-}
-
-VertexAttribute Shader::GetVectorAttribute(const char* name)
-{
-    VertexAttribute va(m_ShaderProgramId, name);
-    if (!va.IsValid())
-        std::cout << "Shader variable '" << name << "' not found or not used." << std::endl;
-
-    return va;
-}
-
 // Uniform variables
 
 bool Uniform::Load(GLuint shaderProgramId, const char* name)
 {
+    if (shaderProgramId == 0)
+        return false;
+
     m_Id = glGetUniformLocation(shaderProgramId, name);
+    if (m_Id == -1)
+        std::cout << "Error: Uniform::m_Id == 0" << std::endl;
+
     return m_Id != -1;
 }
 
@@ -280,23 +287,41 @@ void Uniform::operator=(std::initializer_list<GLfloat> data)
 }
 
 // Vertex Attributes - Vertex Buffer Objects (VBO) or Vertex Array Objects (VAO).
-//      If using as VAOs, call Shader::BeginVAOBind() before calling VertexAttribute::Bind()'s and 
-//      call Shader::EndVAOBind() afterwards.
+//      If using as VAO, need to generate and bind VAO before calling VertexAttribute::Bind()'s and 
+//      then unbind VAO afterwards.
+
+bool VertexAttribute::Load(const char* name)
+{
+    return Load(Shader::Instance()->GetShaderProgramId(), name);
+}
 
 bool VertexAttribute::Load(GLuint shaderProgramId, const char* name)
 {
-    m_Id = glGetAttribLocation(shaderProgramId, name);
-    return m_Id != -1;
-}
+    if (shaderProgramId == 0)
+        return false;
 
-bool VertexAttribute::Bind(const void* data, GLsizeiptr size)
-{
+    m_Id = glGetAttribLocation(shaderProgramId, name);
+    if (m_Id == -1)
+        std::cout << "Error: VertexAttribute::m_Id == 0" << std::endl;
+
     m_VBO = 0;
     glGenBuffers(1, &m_VBO);
 
+    return m_Id != -1;
+}
+
+void VertexAttribute::Set(GLfloat* data, GLsizeiptr size, FillType fillType)
+{
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-    glVertexAttribPointer(m_Id, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glBufferData(GL_ARRAY_BUFFER, size, data, fillType);
+}
+
+bool VertexAttribute::Link(ComponentType componentType, DataType dataType)
+{
+    // Tell it which VBO to use
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+
+    glVertexAttribPointer(m_Id, componentType, dataType, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(m_Id);
 
     return true;
@@ -306,97 +331,24 @@ void VertexAttribute::Destroy()
 {
     // Delete buffers then disable vertex attribute array
     glDeleteBuffers(1, &m_VBO);
-    glDisableVertexAttribArray(m_Id);
+    //glDisableVertexAttribArray(m_Id);
 }
 
-void VertexAttribute::operator=(GLint data)
+void GetError(const char* context)
 {
-    if (m_Id == -1)
-        throw std::invalid_argument("Invalid uniform id");
-    
-    //TODO
-}
-
-void VertexAttribute::operator=(GLuint data)
-{
-    if (m_Id == -1)
-        throw std::invalid_argument("Invalid uniform id");
-    
-    //TODO
-}
-
-void VertexAttribute::operator=(GLfloat data)
-{
-    if (m_Id == -1)
-        throw std::invalid_argument("Invalid uniform id");
-    
-    //TODO
-}
-
-void VertexAttribute::operator=(double data)
-{
-    *this = static_cast<GLfloat>(data);
-}
-
-void VertexAttribute::operator=(std::initializer_list<GLint> data)
-{
-    if (m_Id == -1)
-        throw std::invalid_argument("Invalid uniform id");
-
-    switch (data.size())
+    GLenum loop_error = glGetError();
+    while (loop_error != GL_NO_ERROR)
     {
-        case 2:
-            //TODO
-            break;
-        case 3:
-            //TODO
-            break;
-        case 4:
-            //TODO
-            break;
-        default:
-            throw std::invalid_argument("Wrong number of elements in initializer list");
-    }
-}
-
-void VertexAttribute::operator=(std::initializer_list<GLuint> data)
-{
-    if (m_Id == -1)
-        throw std::invalid_argument("Invalid uniform id");
-
-    switch (data.size())
-    {
-        case 2:
-            //TODO
-            break;
-        case 3:
-            //TODO
-            break;
-        case 4:
-            //TODO
-            break;
-        default:
-            throw std::invalid_argument("Wrong number of elements in initializer list");
-    }
-}
-
-void VertexAttribute::operator=(std::initializer_list<GLfloat> data)
-{
-    if (m_Id == -1)
-        throw std::invalid_argument("Invalid uniform id");
-
-    switch (data.size())
-    {
-        case 2:
-            //TODO
-            break;
-        case 3:
-            //TODO
-            break;
-        case 4:
-            //TODO
-            break;
-        default:
-            throw std::invalid_argument("Wrong number of elements in initializer list");
+        std::cout << "Error! Context: " << context << ": ";
+        switch (loop_error)
+        {
+        case GL_NO_ERROR: std::cout << "GL_NO_ERROR" << std::endl; break;
+        case GL_INVALID_ENUM: std::cout << "GL_INVALID_ENUM" << std::endl; break;
+        case GL_INVALID_VALUE: std::cout << "GL_INVALID_VALUE" << std::endl; break;
+        case GL_INVALID_OPERATION: std::cout << "GL_INVALID_OPERATION" << std::endl; break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl; break;
+        case GL_OUT_OF_MEMORY: std::cout << "GL_OUT_OF_MEMORY" << std::endl; break;
+        }
+        loop_error = glGetError();
     }
 }
