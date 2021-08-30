@@ -20,6 +20,6 @@ public:
         Destroy();
     };
 
-    virtual void Render() = 0;
+    virtual void Render() const = 0;
     virtual void Set(GLfloat* vertexData, GLsizeiptr vertexSize, GLfloat* colorData, GLsizeiptr colorSize) = 0;
 };

@@ -1,6 +1,4 @@
-#include <iostream>
 #include <SDL.h>
-
 #include "glad/glad.h"
 
 #include "Screen.h"
@@ -8,12 +6,17 @@
 #include "Shader.h"
 #include "Quad.h"
 
+#include <vector>
+#include <iostream>
+
 // I'm only using SDL to manage OpenGL context and inputs as a helper for using OpenGL.
 
 bool isAppRunning = true;
 Screen* screen = Screen::Instance();
 Input* input = Input::Instance();
 Shader* shaders = Shader::Instance();
+
+std::vector<Renderable*> objectsToRender;
 
 int main(int argc, char* args[])
 {
@@ -28,6 +31,9 @@ int main(int argc, char* args[])
     // Create and set quad
     Quad quad("vertexIn", "colorIn");
     quad.Set(); // Using default quad - can change later
+    
+    // List of objects to render
+    objectsToRender.push_back(&quad);
 
     // Quad coordinates (middle of screen)
     float xPos = 0.0f;
@@ -64,7 +70,10 @@ int main(int argc, char* args[])
         }
         
         // Update/render stuff
-        quad.Render();
+        for (const Renderable* object : objectsToRender)
+        {
+            object->Render();
+        }
 
         screen->Present();
     }

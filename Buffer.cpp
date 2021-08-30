@@ -88,7 +88,7 @@ void Buffer::Link(VBOType vboType, ComponentType componentType, DataType dataTyp
     glBindVertexArray(0);
 }
 
-void Buffer::Render(DrawType drawType)
+void Buffer::Render(DrawType drawType) const
 {
     glBindVertexArray(m_VAO);
 

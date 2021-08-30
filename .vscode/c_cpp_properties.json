@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "C:/mingw/i686-7.3.0-release-posix-dwarf-rt_v5-rev0/mingw32/i686-w64-mingw32/include/**",
                 "${workspaceFolder}/SDL/include",
-                "${workspaceFolder}/glad/include"
+                "${workspaceFolder}/glad/include",
+                "${workspaceFolder}/glm"
             ],
             "defines": [
                 "_DEBUG",

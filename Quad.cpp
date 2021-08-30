@@ -6,7 +6,7 @@ Quad::Quad(const char* vertexName, const char* colorName)
     Create(6);
 }
 
-void Quad::Render()
+void Quad::Render() const
 {
     Buffer::Render(Buffer::TRIANGLES);
 }

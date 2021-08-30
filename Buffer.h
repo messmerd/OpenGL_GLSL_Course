@@ -25,7 +25,7 @@ protected:
 
     void Link(VBOType vboType, ComponentType componentType, DataType dataType);
 
-    void Render(DrawType drawType);
+    void Render(DrawType drawType) const;
 
 private:
     GLuint m_VAO;
