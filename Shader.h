@@ -2,6 +2,7 @@
 
 #include <string>
 #include "glad/glad.h"
+#include "glm/glm.hpp"
 
 void GetError(const char* context); // For debugging
 
@@ -86,14 +87,16 @@ private:
 public:
     bool Load(GLuint shaderProgramId, const char* name);
 
-    void operator=(GLint data);
-    void operator=(GLuint data);
-    void operator=(GLfloat data);
-    void operator=(double data);
+    void Set(GLint data);
+    void Set(GLuint data);
+    void Set(GLfloat data);
+    void Set(double data);
 
-    void operator=(std::initializer_list<GLint> data);
-    void operator=(std::initializer_list<GLuint> data);
-    void operator=(std::initializer_list<GLfloat> data);
+    void Set(std::initializer_list<GLint> data);
+    void Set(std::initializer_list<GLuint> data);
+    void Set(std::initializer_list<GLfloat> data);
+
+    void Set(const glm::mat4& data);
 };
 
 class VertexAttribute : public ShaderVariable

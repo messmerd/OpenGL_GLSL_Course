@@ -194,7 +194,7 @@ bool Uniform::Load(GLuint shaderProgramId, const char* name)
     return m_Id != -1;
 }
 
-void Uniform::operator=(GLint data)
+void Uniform::Set(GLint data)
 {
     if (m_Id == -1)
         throw std::invalid_argument("Invalid uniform id");
@@ -202,7 +202,7 @@ void Uniform::operator=(GLint data)
     glUniform1i(m_Id, data);
 }
 
-void Uniform::operator=(GLuint data)
+void Uniform::Set(GLuint data)
 {
     if (m_Id == -1)
         throw std::invalid_argument("Invalid uniform id");
@@ -210,7 +210,7 @@ void Uniform::operator=(GLuint data)
     glUniform1ui(m_Id, data);
 }
 
-void Uniform::operator=(GLfloat data)
+void Uniform::Set(GLfloat data)
 {
     if (m_Id == -1)
         throw std::invalid_argument("Invalid uniform id");
@@ -218,12 +218,12 @@ void Uniform::operator=(GLfloat data)
     glUniform1f(m_Id, data);
 }
 
-void Uniform::operator=(double data)
+void Uniform::Set(double data)
 {
-    *this = static_cast<GLfloat>(data);
+    Set(static_cast<GLfloat>(data));
 }
 
-void Uniform::operator=(std::initializer_list<GLint> data)
+void Uniform::Set(std::initializer_list<GLint> data)
 {
     if (m_Id == -1)
         throw std::invalid_argument("Invalid uniform id");
@@ -244,7 +244,7 @@ void Uniform::operator=(std::initializer_list<GLint> data)
     }
 }
 
-void Uniform::operator=(std::initializer_list<GLuint> data)
+void Uniform::Set(std::initializer_list<GLuint> data)
 {
     if (m_Id == -1)
         throw std::invalid_argument("Invalid uniform id");
@@ -265,7 +265,7 @@ void Uniform::operator=(std::initializer_list<GLuint> data)
     }
 }
 
-void Uniform::operator=(std::initializer_list<GLfloat> data)
+void Uniform::Set(std::initializer_list<GLfloat> data)
 {
     if (m_Id == -1)
         throw std::invalid_argument("Invalid uniform id");
@@ -284,6 +284,14 @@ void Uniform::operator=(std::initializer_list<GLfloat> data)
         default:
             throw std::invalid_argument("Wrong number of elements in initializer list");
     }
+}
+
+void Uniform::Set(const glm::mat4& data)
+{
+    if (m_Id == -1)
+        throw std::invalid_argument("Invalid uniform id");
+    
+    glUniformMatrix4fv(m_Id, 1, GL_FALSE, &data[0][0]);
 }
 
 // Vertex Attributes - Vertex Buffer Objects (VBO) or Vertex Array Objects (VAO).

@@ -1,9 +1,13 @@
 #include "Quad.h"
 
-Quad::Quad(const char* vertexName, const char* colorName)
-    : Renderable(vertexName, colorName)
+Quad::Quad(const char* modelName, const char* vertexName, const char* colorName)
+    : Renderable(modelName, vertexName, colorName)
 {
     Create(6);
+
+    //m_Position = glm::vec3(-0.25f, 0.25f, 0.0f);
+    //m_RotationAngle = glm::radians(45.0f);
+    m_Scale = glm::vec3(0.5f, 0.5f, 1.0f);
 }
 
 void Quad::Render() const

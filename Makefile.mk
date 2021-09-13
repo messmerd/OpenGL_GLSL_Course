@@ -1,5 +1,5 @@
-OBJS	= Main.o Screen.o Input.o Shader.o Buffer.o Quad.o glad.o
-SOURCE	= Main.cpp Screen.cpp Input.cpp Shader.cpp Buffer.cpp Quad.cpp glad/src/glad.c
+OBJS	= Main.o Screen.o Input.o Shader.o Buffer.o Renderable.o Quad.o glad.o
+SOURCE	= Main.cpp Screen.cpp Input.cpp Shader.cpp Buffer.cpp Renderable.cpp Quad.cpp glad/src/glad.c
 #HEADER	=
 
 ifeq ($(OS),Windows_NT)
@@ -17,6 +17,9 @@ LFLAGS	 = -ISDL/include -LSDL/lib -lmingw32 -lSDL2main -lSDL2 -lopengl32
 all: $(OBJS)
 	$(CC) -g $(OBJS) $(LFLAGS) -o $(OUT)
 
+glad.o: glad/src/glad.c
+	$(CC) $(FLAGS) glad/src/glad.c
+
 Main.o: Main.cpp
 	$(CC) $(FLAGS) Main.cpp 
 
@@ -32,11 +35,11 @@ Shader.o: Shader.cpp
 Buffer.o: Buffer.cpp
 	$(CC) $(FLAGS) Buffer.cpp 
 
+Renderable.o: Renderable.cpp
+	$(CC) $(FLAGS) Renderable.cpp 
+
 Quad.o: Quad.cpp
 	$(CC) $(FLAGS) Quad.cpp 
-
-glad.o: glad/src/glad.c
-	$(CC) $(FLAGS) glad/src/glad.c
 
 clean:
 	$(RM) $(OUT) $(OBJS) 
