@@ -32,8 +32,9 @@ int main(int argc, char* args[])
     if (!shaders->Initialize("Shaders/Main.vert", "Shaders/Main.frag"))
         return 1;
     
-    // Create camera
+    // Create camera and set up projection matrix
     Camera camera;
+    camera.Set3DView();
 
     // Create and set quad
     Quad quad("model", "vertexIn", "colorIn");
