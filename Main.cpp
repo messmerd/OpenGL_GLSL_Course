@@ -4,6 +4,7 @@
 #include "Screen.h"
 #include "Input.h"
 #include "Shader.h"
+#include "Camera.h"
 #include "Quad.h"
 
 #include <vector>
@@ -31,6 +32,9 @@ int main(int argc, char* args[])
     if (!shaders->Initialize("Shaders/Main.vert", "Shaders/Main.frag"))
         return 1;
     
+    // Create camera
+    Camera camera;
+
     // Create and set quad
     Quad quad("model", "vertexIn", "colorIn");
     quad.Set(); // Using default quad - can change later
@@ -50,6 +54,9 @@ int main(int argc, char* args[])
 
         HandleKeyPress(quad);
         
+        // Update camera
+        camera.Update();
+
         // Update/render stuff
         for (Renderable* object : objectsToRender)
         {
@@ -75,21 +82,29 @@ void HandleKeyPress(Quad& obj)
 {
     if (input->IsKeyPressed())
     {
-        if (input->GetKeyDown() == 'w')
+        if (input->GetKeyDown() == 'i')
         {
-            obj.SetPositionY(0.001f, true);
+            obj.SetPositionZ(-0.001f, true);
         }
-        else if (input->GetKeyDown() == 'a')
+        else if (input->GetKeyDown() == 'j')
         {
             obj.SetPositionX(-0.001f, true);
         }
-        else if (input->GetKeyDown() == 's')
+        else if (input->GetKeyDown() == 'k')
         {
-            obj.SetPositionY(-0.001f, true);
+            obj.SetPositionZ(0.001f, true);
         }
-        else if (input->GetKeyDown() == 'd')
+        else if (input->GetKeyDown() == 'l')
         {
             obj.SetPositionX(0.001f, true);
+        }
+        else if (input->GetKeyDown() == 'u')
+        {
+            obj.SetPositionY(0.001f, true);
+        }
+        else if (input->GetKeyDown() == 'o')
+        {
+            obj.SetPositionY(-0.001f, true);
         }
     }
 }
